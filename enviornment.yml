@@ -139,7 +139,17 @@ dependencies:
   - zeromq=4.3.1=he6710b0_3
   - zlib=1.2.11=h7b6447c_3
   - pip:
+    - astroid==2.4.1
     - hyperdash==0.15.3
+    - isort==4.3.21
+    - lazy-object-proxy==1.4.3
+    - mccabe==0.6.1
+    - pep8==1.7.1
+    - pylint==2.5.2
     - python-slugify==4.0.0
     - text-unidecode==1.3
+    - toml==0.10.0
+    - typed-ast==1.4.1
     - ujson==1.35
+    - wrapt==1.12.1
+
