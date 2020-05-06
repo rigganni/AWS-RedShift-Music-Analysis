@@ -72,7 +72,7 @@ roleArn = iam.get_role(RoleName=DWH_IAM_ROLE_NAME)['Role']['Arn']
 # Adapted from https://stackoverflow.com/questions/27964134/change-value-in-ini-file-using-configparser-python
 config.set("IAM_ROLE", "ARN", roleArn)
 
-with open("dwh2.cfg", "w") as configfile:
+with open("dwh.cfg", "w") as configfile:
     config.write(configfile)
 
 try:
@@ -112,5 +112,5 @@ for clusterNode in myClusterLeaderNode["ClusterNodes"]:
 # Adapted from https://stackoverflow.com/questions/27964134/change-value-in-ini-file-using-configparser-python
 config.set("DWH", "DWH_HOST", DWH_ENDPOINT)
 
-with open("dwh2.cfg", "w") as configfile:
+with open("dwh.cfg", "w") as configfile:
     config.write(configfile)
