@@ -159,12 +159,6 @@ WHERE page = 'NextSong'
 # Design decision: level is equal to the last event record by timestamp for each user
 # Adapted from https://stackoverflow.com/questions/6841605/get-top-1-row-of-each-group
 user_table_insert = ("""
-WITH last_level AS
-(
-  SELECT *, 
-         ROW_NUMBER() OVER (PARTITION BY userid ORDER BY ts DESC) as rn
-  FROM staging_events
-)
 INSERT INTO users (
         user_id,
         first_name,
@@ -172,12 +166,16 @@ INSERT INTO users (
         gender,
         level
 )
-SELECT DISTINCT userid,
-        firstName,
-        lastName,
-        gender,
-        level
-FROM last_level
+SELECT DISTINCT *
+FROM (
+SELECT userid,
+       firstName,
+       lastName,
+       gender,
+       level,
+       ROW_NUMBER() OVER (PARTITION BY userid ORDER BY ts DESC) as rn
+FROM staging_events
+) 
 WHERE rn = 1
 """)
 
