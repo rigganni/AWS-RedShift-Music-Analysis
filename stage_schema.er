@@ -1,0 +1,33 @@
+title {label: "Staging Song & Event Data Model", size: "20"}
+[stage_events]
+  *event_id {label: "INT IDENTITY(1,1) PRIMARY KEY"}
+  artist {label: "VARCHAR, NULL"}
+  auth {label: "VARCHAR, NULL"}
+  firstName {label: "VARCHAR, NULL"}
+  gender {label: "CHAR(1), NULL"}
+  itemInSession {label: "SMALLINT, NULL"}
+  lastName {label: "VARCHAR, NULL"}
+  length {label: "REAL, NULL"}
+  level {label: "VARCHAR, NULL"}
+  location {label: "VARCHAR, NULL"}
+  method {label: "VARCHAR, NULL"}
+  page {label: "VARCHAR, NULL"}
+  registration {label: "BIGINT, NULL"}
+  sessionId {label: "INT, NULL"}
+  song {label: "VARCHAR, NULL"}
+  status {label: "SMALLINT, NULL"}
+  ts {label: "BIGINT, NULL"}
+  userAgent {label: "VARCHAR , NULL"}
+  userId {label: "INT, NULL"}
+
+[stage_music]
+  num_songs {label: "SMALLINT, NULL"}
+  artist_id {label: "VARCHAR, NULL"}
+  artist_latitude {label: "REAL, NULL"}
+  artist_longitude {label: "REAL, NULL"}
+  artist_location {label: "VARCHAR, NULL"}
+  artist_name {label: "VARCHAR, NULL"}
+  song_id {label: "VARCHAR, NULL"}
+  title {label: "VARCHAR, NULL"}
+  duration {label: "REAL, NULL"}
+  year {label: "SMALLINT, NULL"}
