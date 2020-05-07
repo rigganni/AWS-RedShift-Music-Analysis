@@ -61,7 +61,7 @@ CREATE TABLE songplay (
     start_time TIMESTAMP NOT NULL,
     user_id INT NOT NULL,
     level VARCHAR,
-    song_id VARCHAR NOT NULL DISTKEY SORTKEY,
+    song_id VARCHAR DISTKEY SORTKEY,
     artist_id VARCHAR,
     session_id INT,
     location VARCHAR NULL,

@@ -1,26 +1,25 @@
-title {label: "Staging Song & Event Data Model", size: "20"}
-[stage_events]
-  *event_id {label: "INT IDENTITY(1,1) PRIMARY KEY"}
+title {label: "Sparkify Staging Tables", size: "20"}
+[staging_events]
   artist {label: "VARCHAR, NULL"}
   auth {label: "VARCHAR, NULL"}
   firstName {label: "VARCHAR, NULL"}
   gender {label: "CHAR(1), NULL"}
-  itemInSession {label: "SMALLINT, NULL"}
+  itemInSession {label: "SMALLINT, NOT NULL"}
   lastName {label: "VARCHAR, NULL"}
   length {label: "REAL, NULL"}
   level {label: "VARCHAR, NULL"}
   location {label: "VARCHAR, NULL"}
-  method {label: "VARCHAR, NULL"}
-  page {label: "VARCHAR, NULL"}
+  method {label: "VARCHAR, NOT NULL"}
+  page {label: "VARCHAR, NOT NULL"}
   registration {label: "BIGINT, NULL"}
-  sessionId {label: "INT, NULL"}
+  sessionId {label: "INT, NOT NULL"}
   song {label: "VARCHAR, NULL"}
-  status {label: "SMALLINT, NULL"}
-  ts {label: "BIGINT, NULL"}
+  status {label: "SMALLINT, NOT NULL"}
+  ts {label: "BIGINT, NOT NULL"}
   userAgent {label: "VARCHAR , NULL"}
   userId {label: "INT, NULL"}
 
-[stage_music]
+[staging_songs]
   num_songs {label: "SMALLINT, NULL"}
   artist_id {label: "VARCHAR, NULL"}
   artist_latitude {label: "REAL, NULL"}

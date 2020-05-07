@@ -1,24 +1,24 @@
-title {label: "Sparkify Dimensional Data Model", size: "20"}
+title {label: "Sparkify Dimensional Data Model (RedShift Implementation)", size: "20"}
 
-[songplays]  {bgcolor: "#ececfc"}
-  *songplay_id {label: "BIGINT, PART KEY"}
-  start_time {label: "INT, NOT NULL"}
-  user_id {label: "INT, NOT NULL"}
+[songplay]  {bgcolor: "#ececfc"}
+  *songplay_id {label: "BIGINT, IDENTITY(0,1), PRIMARY KEY"}
+  +start_time {label: "TIMESTAMP, NOT NULL"}
+  +user_id {label: "INT, NOT NULL"}
   level {label: "VARCHAR, NULL"}
-  song_id {label: "INT, NOT NULL, SORT KEY"}
-  artist_id {label: "INT, NOT NULL"}
+  +song_id {label: "VARCHAR, NULL, DISTKEY, SORTKEY"}
+  +artist_id {label: "INT, NULL"}
   session_id {label: "INT, NULL"}
   location {label: "VARCHAR, NULL"}
   user_agent {label: "VARCHAR, NULL"}
 
 [time] {bgcolor: "#d0e0d0"}
-  *start_time {label: "INT, PRIMARY KEY"}
+  *start_time {label: "TIMESTAMP, PRIMARY KEY"}
   hour {label: "SMALLINT, NOT NULL"}
   day {label: "SMALLINT, NOT NULL"}
   week {label: "SMALLINT, NOT NULL"}
   month {label: "SMALLINT, NOT NULL"}
   year {label: "SMALLINT, NOT NULL"}
-  weekeday {label: "SMALLINT, NOT NULL"}
+  weekday {label: "SMALLINT, NOT NULL"}
 
 [users] {bgcolor: "#d0e0d0"}
   *user_id {label: "INT, PRIMARY KEY"}
@@ -28,22 +28,21 @@ title {label: "Sparkify Dimensional Data Model", size: "20"}
   level {label: "VARCHAR, NULL"}
 
 [songs] {bgcolor: "#d0e0d0"}
-  *song_id {label: "INT, PRIMARY KEY"}
+  *song_id {label: "VARCHAR, PRIMARY KEY, DISTKEY"}
   title {label: "VARCHAR, NOT NULL"}
-  +artist_id {label: "INT, NOT NULL"}
+  +artist_id {label: "VARCHAR, NOT NULL"}
   year {label: "SMALLINT, NOT NULL"}
   duration {label: "REAL, NULL"}
 
-[artists] {bgcolor: "#d0e0d0"}
-  *artist_id {label: "INT, PRIMARY KEY"}
+[artists] {bgcolor: "#d0e0d0", label: "diststyle all"}
+  *artist_id {label: "VARCHAR, PRIMARY KEY"}
   name {label: "VARCHAR, NOT NULL"}
   location {label: "VARCHAR, NULL"}
-  lattitude {label: "REAL, NULL"}
+  latitude {label: "REAL, NULL"}
   longitude {label: "REAL, NULL"}
 
-songplays *--1 time
-songplays *--1 users
-songplays *--1 artists
-songplays *--1 songs
+songplay *--1 time
+songplay *--1 users
+songplay *--1 artists
+songplay *--1 songs
 artists 1--* songs
-
