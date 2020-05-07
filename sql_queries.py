@@ -58,11 +58,11 @@ CREATE TABLE staging_songs (
 songplay_table_create = ("""
 CREATE TABLE songplay (
     songplay_id BIGINT IDENTITY(0,1) PRIMARY KEY,
-    start_time INT NOT NULL,
+    start_time TIMESTAMP NOT NULL,
     user_id INT NOT NULL,
     level VARCHAR,
     song_id VARCHAR NOT NULL DISTKEY SORTKEY,
-    artist_id INT NOT NULL,
+    artist_id VARCHAR,
     session_id INT,
     location VARCHAR NULL,
     user_agent VARCHAR NULL
@@ -83,7 +83,7 @@ song_table_create = ("""
 CREATE TABLE songs (
     song_id VARCHAR PRIMARY KEY DISTKEY,
     title VARCHAR NOT NULL,
-    artist_id INT NOT NULL,
+    artist_id VARCHAR NOT NULL,
     year SMALLINT NOT NULL,
     duration REAL
     ); 
@@ -131,7 +131,9 @@ JSON 'auto';
 
 # FINAL TABLES
 # Assuming no two songs are of same title and duration for song_id lookup
-# Assuming combo of artist name and location make unique artist_id 
+# Using only one result for artist_id due to duplicate artist_id's at same lat/long but different id's
+# Data quality issue in source artist data
+# Empty strings found. Used answer found here for empty strings: https://stackoverflow.com/questions/27479180/using-coalesce-to-handle-null-values-in-postgresql/27485689
 songplay_table_insert = ("""
 INSERT INTO songplay (
     start_time,
@@ -147,8 +149,8 @@ SELECT
 	  TIMESTAMP 'epoch' + (ts/1000) * interval '1 second',
     userid,
     level,
-    (SELECT song_id FROM songs WHERE song.title = se.song AND song.duration = se.length),
-    (SELECT artist_id FROM artists WHERE artists.name = se.artist and artists.location = se.artist_location),
+    (SELECT song_id FROM songs WHERE songs.title = se.song AND songs.duration = se.length),
+    (SELECT COALESCE( NULLIF(artist_id, ''), 'No Artist Given') FROM artists WHERE artists.name = se.artist LIMIT 1),
     sessionid,
     location,
     useragent
@@ -166,7 +168,12 @@ INSERT INTO users (
         gender,
         level
 )
-SELECT DISTINCT *
+SELECT DISTINCT 
+        userid,
+        firstName,
+        lastName,
+        gender,
+        level
 FROM (
 SELECT userid,
        firstName,
@@ -175,6 +182,7 @@ SELECT userid,
        level,
        ROW_NUMBER() OVER (PARTITION BY userid ORDER BY ts DESC) as rn
 FROM staging_events
+WHERE userid IS NOT NULL -- do not pull in to users table values with NULL id's
 ) 
 WHERE rn = 1
 """)
@@ -190,7 +198,7 @@ INSERT INTO songs (
 SELECT DISTINCT
                 song_id,
                 title,
-                artist_id,
+                COALESCE(artist_id, 'No Artist Given'),
                 year,
                 duration
 FROM staging_songs
@@ -199,18 +207,31 @@ FROM staging_songs
 artist_table_insert = ("""
 INSERT INTO artists (
           artist_id,
-          name
+          name,
           location,
           latitude,
           longitude
 )
 SELECT DISTINCT
-                artist_id,
+                COALESCE(artist_id, 'No Artist Given'),
                 artist_name,
                 artist_location,
                 artist_latitude,
                 artist_longitude
 FROM staging_songs
+WHERE artist_id IS NOT NULL --Exclude rows where artist_id is NULL since attributes vary
+""")
+
+# Insert user-friendly value for artists that are NULL
+no_artist_table_insert = ("""
+INSERT INTO artists (
+          artist_id,
+          name,
+          location,
+          latitude,
+          longitude
+)
+VALUES('No Artist Given', 'No Artist Given', 'No Artist Given', NULL, NULL)
 """)
 
 # Source: https://knowledge.udacity.com/questions/74200
@@ -243,4 +264,4 @@ FROM (
 create_table_queries = [staging_events_table_create, staging_songs_table_create, songplay_table_create, user_table_create, song_table_create, artist_table_create, time_table_create]
 drop_table_queries = [staging_events_table_drop, staging_songs_table_drop, songplay_table_drop, user_table_drop, song_table_drop, artist_table_drop, time_table_drop]
 copy_table_queries = [staging_events_copy, staging_songs_copy]
-insert_table_queries = [user_table_insert, song_table_insert, artist_table_insert, time_table_insert, songplay_table_insert]
+insert_table_queries = [user_table_insert, song_table_insert, artist_table_insert, no_artist_table_insert, time_table_insert, songplay_table_insert]
