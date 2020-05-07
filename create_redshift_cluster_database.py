@@ -28,23 +28,25 @@ DWH_CLUSTER_SUBNET_NAME= config.get("DWH", "DWH_CLUSTER_SUBNET_NAME")
 
 DWH_IAM_ROLE_NAME      = config.get("DWH", "DWH_IAM_ROLE_NAME")
 DWH_ROLE_ARN           = config.get("DWH", "DWH_ROLE_ARN")
+DWH_CLUSTER_SUBNET_GROUP_NAME = config.get("DWH", "DWH_CLUSTER_SUBNET_GROUP_NAME")
 
-
+# Create client for RedShift
 redshift = boto3.client('redshift',
                        region_name=DWH_REGION,
                        aws_access_key_id=KEY,
                        aws_secret_access_key=SECRET
                        )
 
+# Create client to create IAM role to access S3 resources
 iam = boto3.client('iam',aws_access_key_id=KEY,
                      aws_secret_access_key=SECRET,
                      region_name=DWH_REGION
                   )
 
 
-#1.1 Create the role, 
+# Create the IAM role 
 try:
-    print("1.1 Creating a new IAM Role") 
+    print("Creating a new IAM Role") 
     dwhRole = iam.create_role(
         Path='/',
         RoleName=DWH_IAM_ROLE_NAME,
@@ -59,13 +61,13 @@ except Exception as e:
     print(e)
     
     
-print("1.2 Attaching Policy")
+print("Attaching Policy")
 
 iam.attach_role_policy(RoleName=DWH_IAM_ROLE_NAME,
                        PolicyArn="arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
                       )['ResponseMetadata']['HTTPStatusCode']
 
-print("1.3 Get the IAM role ARN")
+print("Get the IAM role ARN")
 roleArn = iam.get_role(RoleName=DWH_IAM_ROLE_NAME)['Role']['Arn']
 
 # Write newly created ARN to IAM_ROLE ARN variable in dwh.cfg
@@ -75,13 +77,14 @@ config.set("IAM_ROLE", "ARN", roleArn)
 with open("dwh.cfg", "w") as configfile:
     config.write(configfile)
 
+# Create RedShift cluster
 try:
     response = redshift.create_cluster(       
         #HW
         ClusterType=DWH_CLUSTER_TYPE,
         NodeType=DWH_NODE_TYPE,
         NumberOfNodes=int(DWH_NUM_NODES),
-        ClusterSubnetGroupName="udacity-data-engineering-west",
+        ClusterSubnetGroupName=DWH_CLUSTER_SUBNET_GROUP_NAME, # Used to place cluster in specified VPC. You must have access to said VPC (i.e. VPN, bastion host, etc.)
 
         #Identifiers & Credentials
         DBName=DWH_DB,

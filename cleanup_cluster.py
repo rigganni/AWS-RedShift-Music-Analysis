@@ -2,6 +2,7 @@ import boto3
 import configparser
 
 
+# Obtain RedShift credentials
 config = configparser.ConfigParser()
 config.read_file(open('dwh.cfg'))
 
@@ -19,6 +20,7 @@ redshift = boto3.client('redshift',
                        aws_secret_access_key=SECRET
                        )
 
+# Delete RedShift cluster. No need for final snapshot.
 redshift.delete_cluster( ClusterIdentifier=DWH_CLUSTER_IDENTIFIER,  SkipFinalClusterSnapshot=True)
 
 # Delete IAM role
