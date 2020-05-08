@@ -19,7 +19,7 @@ time_table_drop = "DROP TABLE IF EXISTS time"
 
 staging_events_table_create= ("""
   CREATE TABLE staging_events (
-    artist VARCHAR, 
+    artist VARCHAR,
     auth VARCHAR,
     firstName VARCHAR,
     gender CHAR(1),
@@ -86,7 +86,7 @@ CREATE TABLE songs (
     artist_id VARCHAR NOT NULL,
     year SMALLINT NOT NULL,
     duration REAL
-    ); 
+    );
 """)
 
 artist_table_create = ("""
@@ -114,18 +114,18 @@ CREATE TABLE time (
 # STAGING TABLES
 
 staging_events_copy = ("""
-COPY staging_events 
+COPY staging_events
 FROM 's3://udacity-dend/log_data'
 IAM_ROLE {}
-REGION 'us-west-2' compupdate off 
+REGION 'us-west-2' compupdate off
 JSON 's3://udacity-dend/log_json_path.json';
 """).format(DWH_IAM_ROLE)
 
 staging_songs_copy = ("""
-copy staging_songs 
+copy staging_songs
 FROM 's3://udacity-dend/song_data'
 IAM_ROLE {}
-REGION 'us-west-2' compupdate off 
+REGION 'us-west-2' compupdate off
 JSON 'auto';
 """).format(DWH_IAM_ROLE)
 
@@ -145,7 +145,7 @@ INSERT INTO songplay (
     location,
     user_agent
 )
-SELECT 
+SELECT
 	  TIMESTAMP 'epoch' + (ts/1000) * interval '1 second',
     userid,
     level,
@@ -168,7 +168,7 @@ INSERT INTO users (
         gender,
         level
 )
-SELECT DISTINCT 
+SELECT DISTINCT
         userid,
         firstName,
         lastName,
@@ -182,8 +182,10 @@ SELECT userid,
        level,
        ROW_NUMBER() OVER (PARTITION BY userid ORDER BY ts DESC) as rn
 FROM staging_events
-WHERE userid IS NOT NULL -- do not pull in to users table values with NULL id's
-) 
+WHERE  page = 'NextSong'
+       AND
+       userid IS NOT NULL -- do not pull in to users table values with NULL id's
+)
 WHERE rn = 1
 """)
 
@@ -193,7 +195,7 @@ INSERT INTO songs (
         title,
         artist_id,
         year,
-        duration 
+        duration
 )
 SELECT DISTINCT
                 song_id,
@@ -253,8 +255,8 @@ SELECT ts.start_time,
        EXTRACT(YEAR FROM ts.start_time),
        EXTRACT(WEEKDAY FROM ts.start_time) AS weekday
 FROM (
-	SELECT 
-	  TIMESTAMP 'epoch' + (ts/1000) * interval '1 second' as start_time 
+	SELECT
+	  TIMESTAMP 'epoch' + (ts/1000) * interval '1 second' as start_time
 	FROM staging_events
 ) ts
 """)
